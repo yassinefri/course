@@ -1,0 +1,19 @@
+# Utilisation d'une image Python avec CMake préinstallé
+FROM python:3.9
+
+# Mise à jour et installation de CMake et des dépendances requises
+RUN apt-get update && apt-get install -y cmake libopencv-dev python3-opencv \
+    && rm -rf /var/lib/apt/lists/*
+
+# Définition du dossier de travail
+WORKDIR /app
+
+# Copier les fichiers du projet dans le conteneur
+COPY . /app
+
+# Installation des dépendances Python
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install face_recognition opencv-python numpy
+
+# Exécuter le script
+CMD ["python", "script.py"]

@@ -1,37 +1,25 @@
 version: '3.8'
 
 services:
-  mariadb:
-    image: "mariadb:latest"
-    restart: 'always'
+  face_recognition:
+    image: python:3.9
+    container_name: face_recognition_app
+    restart: unless-stopped
+    working_dir: /app
     volumes:
-      - "./data:/var/lib/mysql"
-      - "./logs:/var/log/mysql"
-      - "/var/docker/mariadb/conf:/etc/mysql"
+      - .:/app
+    command: ["python", "script.py"]
     environment:
-      MYSQL_ROOT_PASSWORD: "root"
-      MYSQL_DATABASE: "heticdb"
-      MYSQL_USER: "hetic"
-      MYSQL_PASSWORD: "hetic"
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      - cmake
+    build:
+      context: .
+      dockerfile: Dockerfile
 
-  phpmyadmin:
-    image: phpmyadmin
-    restart: always
-    ports:
-      - "40001:80"
-    environment:
-      PMA_HOST: mariadb
-      PMA_PORT: 3306
-
-  wordpress:
-    image: wordpress
-    restart: always
-    ports:
-      - "80:80"
-    environment:
-      WORDPRESS_DB_HOST: mariadb
-      WORDPRESS_DB_NAME: heticdb
-      WORDPRESS_DB_USER: hetic
-      WORDPRESS_DB_PASSWORD: hetic
-    volumes:
-      - "./wordpress:/var/www/html"
+  cmake:
+    image: ubuntu:latest
+    container_name: cmake_installer
+    restart: unless-stopped
+    command: >
+      sh -c "apt-get update && apt-get install -y cmake && cmake --version"
